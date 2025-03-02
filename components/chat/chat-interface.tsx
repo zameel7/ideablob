@@ -71,8 +71,8 @@ export function ChatInterface() {
   if (apiKeyError) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-        <h2 className="text-2xl font-bold mb-2">API Key Required</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+        <h2 className="text-xl sm:text-2xl font-bold mb-2">API Key Required</h2>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md">
           To use the AI features, you need to add your Google Generative AI API key in your profile settings.
         </p>
         <Button onClick={navigateToProfile}>
@@ -84,35 +84,35 @@ export function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-16 md:pb-0 mb-16 md:mb-0">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-            <h2 className="text-2xl font-bold mb-2">Welcome to IdeaBlob</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">Welcome to IdeaBlob</h2>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md">
               Start a conversation with the AI assistant to organize your thoughts, take notes, and get suggestions.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-              <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
-                <h3 className="font-medium mb-2">Ask a question</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-2xl w-full">
+              <div className="p-3 sm:p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+                <h3 className="font-medium text-sm sm:text-base mb-1 sm:mb-2">Ask a question</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   "What are some creative ways to solve this problem?"
                 </p>
               </div>
-              <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
-                <h3 className="font-medium mb-2">Brainstorm ideas</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="p-3 sm:p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+                <h3 className="font-medium text-sm sm:text-base mb-1 sm:mb-2">Brainstorm ideas</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   "Help me brainstorm ideas for my new project"
                 </p>
               </div>
-              <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
-                <h3 className="font-medium mb-2">Take notes</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="p-3 sm:p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+                <h3 className="font-medium text-sm sm:text-base mb-1 sm:mb-2">Take notes</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   "I need to remember to call John tomorrow about the meeting"
                 </p>
               </div>
-              <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
-                <h3 className="font-medium mb-2">Organize thoughts</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="p-3 sm:p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+                <h3 className="font-medium text-sm sm:text-base mb-1 sm:mb-2">Organize thoughts</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   "Help me organize my thoughts on this topic"
                 </p>
               </div>
@@ -128,15 +128,15 @@ export function ChatInterface() {
               />
             ))}
             {isLoading && (
-              <div className="p-4 flex items-center">
-                <div className="w-8 h-8 mr-2">
+              <div className="p-3 sm:p-4 flex items-center">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 mr-2">
                   <div className="animate-pulse flex space-x-1">
-                    <div className="h-2 w-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
-                    <div className="h-2 w-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
-                    <div className="h-2 w-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+                    <div className="h-1.5 sm:h-2 w-1.5 sm:w-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+                    <div className="h-1.5 sm:h-2 w-1.5 sm:w-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+                    <div className="h-1.5 sm:h-2 w-1.5 sm:w-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
                   </div>
                 </div>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   IdeaBlob is thinking...
                 </span>
               </div>
@@ -145,7 +145,11 @@ export function ChatInterface() {
           </div>
         )}
       </div>
-      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+      <div className="fixed bottom-16 left-0 right-0 md:relative md:bottom-auto w-full z-10 px-4 md:px-0">
+        <div className="max-w-4xl mx-auto">
+          <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        </div>
+      </div>
     </div>
   );
 } 

@@ -65,7 +65,7 @@ IdeaBlob is a modern web application that combines note-taking with AI-powered f
 
 1. **Sign up or log in** using email/password or Google authentication
 2. **Add your Google Gemini API key** in the profile settings
-   - You can get a free API key from [Google AI Studio](https://ai.google.dev/)
+   - You can get a free API key from [Google AI Studio](https://aistudio.google.com/)
    - The key is stored securely in your browser's localStorage
 3. **Start chatting** with the AI assistant to generate ideas and take notes
 4. **Organize your notes** by categories and tags
@@ -116,4 +116,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Tailwind CSS](https://tailwindcss.com/)
 - [shadcn/ui](https://ui.shadcn.com/)
 - [Firebase](https://firebase.google.com/)
-- [Google Gemini AI](https://ai.google.dev/)
+- [Google Gemini AI](https://aistudio.google.com/)

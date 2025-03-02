@@ -159,68 +159,80 @@ export function NotesList({ searchQuery = "" }: NotesListProps) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Your Notes</h1>
-        <Button onClick={() => setIsEditorOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+    <div className="space-y-6">
+      <div className="flex flex-row justify-end md:hidden">
+        <Button onClick={() => setIsEditorOpen(true)} className="h-10 px-4 rounded-full flex items-center gap-2 bg-gray-900 hover:bg-gray-800">
+          <Plus className="h-4 w-4" />
           New Note
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="h-[200px]">
-              <CardHeader className="p-4">
-                <Skeleton className="h-4 w-24" />
+            <Card key={i} className="overflow-hidden border rounded-xl">
+              <CardHeader className="p-4 pb-2 space-y-1.5">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/3" />
               </CardHeader>
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-2/3" />
+              <CardContent className="p-4 pt-0">
+                <div className="mt-2 space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
               </CardContent>
-              <CardFooter className="p-4 border-t">
-                <Skeleton className="h-4 w-20" />
+              <CardFooter className="p-4 pt-2 border-t">
+                <Skeleton className="h-3 w-1/4" />
               </CardFooter>
             </Card>
           ))}
         </div>
       ) : (
         <>
-          <div className="border rounded-lg p-1.5 mb-6">
-            <Tabs defaultValue="all" onValueChange={handleCategoryChange}>
-              <TabsList className="w-full flex flex-wrap justify-start bg-transparent">
-                <TabsTrigger value="all" className="flex-grow-0 px-4 py-2 data-[state=active]:bg-background">
+          <div className="flex overflow-x-auto pb-3 -mx-1">
+            <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+              <TabsList className="bg-transparent h-auto flex gap-2 p-1">
+                <TabsTrigger 
+                  value="all" 
+                  className="data-[state=active]:bg-background rounded-full px-6 py-2.5 h-auto border data-[state=active]:border-transparent"
+                >
                   All Notes
                 </TabsTrigger>
                 {categories.map((category) => (
                   <TabsTrigger
                     key={category.id}
                     value={category.id}
-                    className="flex-grow-0 px-4 py-2 data-[state=active]:bg-background"
+                    className="data-[state=active]:bg-background rounded-full px-6 py-2.5 h-auto border data-[state=active]:border-transparent"
                   >
                     {category.name}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
+            <Button 
+              onClick={() => setIsEditorOpen(true)} 
+              className="h-10 px-4 rounded-full flex items-center gap-2 bg-gray-900 hover:bg-gray-800 hidden md:flex"
+            >
+              <Plus className="h-4 w-4" />
+              New Note
+            </Button>
           </div>
 
           {filteredNotes.length === 0 ? (
-            <div className="text-center py-16 border rounded-lg bg-muted/20">
+            <div className="text-center py-16 border rounded-xl bg-muted/10">
               <h3 className="text-lg font-medium mb-2">No notes found</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 {selectedCategory === "all"
                   ? "You haven't created any notes yet."
                   : `You don't have any notes in the "${getCategoryName(selectedCategory)}" category.`}
               </p>
-              <Button onClick={() => setIsEditorOpen(true)}>
+              <Button onClick={() => setIsEditorOpen(true)} className="rounded-full">
                 Create your first note
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredNotes.map((note) => (
                 <NoteCard
                   key={note.id}

@@ -34,7 +34,6 @@ import {
 } from "@/components/ui/select";
 import { Note, NoteInput } from "@/lib/note-service";
 import { Category } from "@/lib/category-service";
-import { X } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -106,17 +105,14 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
+      <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto p-6">
         <SheetHeader className="mb-8">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-xl font-bold">
               {note ? "Edit Note" : "Create Note"}
             </SheetTitle>
-            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
-              <X className="h-4 w-4" />
-            </Button>
           </div>
-          <SheetDescription className="mt-1.5">
+          <SheetDescription className="mt-1.5 text-muted-foreground">
             {note
               ? "Make changes to your note here"
               : "Add a new note to your collection"}
@@ -124,7 +120,7 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
         </SheetHeader>
         
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
@@ -134,7 +130,7 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
                   <FormControl>
                     <Input
                       placeholder="Note title"
-                      className="h-10"
+                      className="h-10 rounded-lg"
                       {...field}
                     />
                   </FormControl>
@@ -152,7 +148,7 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
                   <FormControl>
                     <Textarea
                       placeholder="Write your note here..."
-                      className="min-h-[200px] resize-none"
+                      className="min-h-[200px] resize-none rounded-lg"
                       {...field}
                     />
                   </FormControl>
@@ -173,11 +169,11 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="h-10">
+                      <SelectTrigger className="h-10 rounded-lg">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg">
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
@@ -199,11 +195,11 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
                   <FormControl>
                     <Textarea
                       placeholder="work, important, todo"
-                      className="min-h-[80px] resize-none"
+                      className="min-h-[80px] resize-none rounded-lg"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription className="mt-1.5">
+                  <FormDescription className="mt-1.5 text-sm text-muted-foreground">
                     Separate tags with commas
                   </FormDescription>
                   <FormMessage />
@@ -212,17 +208,21 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
             />
             
             <SheetFooter className="pt-6 border-t mt-8">
-              <div className="flex justify-end space-x-4 w-full mt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 w-full mt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={onClose}
                   disabled={isLoading}
-                  className="px-6"
+                  className="px-6 rounded-lg h-10"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading} className="px-6">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading} 
+                  className="px-6 rounded-lg h-10"
+                >
                   {isLoading
                     ? note
                       ? "Updating..."

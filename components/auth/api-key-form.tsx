@@ -79,7 +79,7 @@ export function ApiKeyForm() {
                     <span className="block mb-2">To get your API key:</span>
                     <ol className="list-decimal pl-5 space-y-1 text-sm">
                       <li>Go to <a
-                        href="https://ai.google.dev/"
+                        href="https://aistudio.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline inline-flex items-center"

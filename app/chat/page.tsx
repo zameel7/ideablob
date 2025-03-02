@@ -6,9 +6,10 @@ import { AppLayout } from "@/components/layout/app-layout";
 export default function ChatPage() {
   return (
     <AppLayout>
-      <div className="container mx-auto p-4 h-full">
-        <h1 className="text-2xl font-bold mb-6">Chat with IdeaBlob</h1>
-        <ChatInterface />
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 h-[calc(100vh-4rem)] flex flex-col">
+        <div className="flex-1 overflow-hidden">
+          <ChatInterface />
+        </div>
       </div>
     </AppLayout>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { MessageSquare, FolderOpen, User, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -15,10 +16,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
 
   const handleLogout = async () => {
     try {
@@ -40,8 +44,17 @@ export function Sidebar() {
 
   return (
     <div className="hidden h-screen w-64 flex-col bg-gray-50 border-r border-gray-200 dark:bg-gray-900 dark:border-gray-800 md:flex">
-      <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-800">
-        <h1 className="text-xl font-bold">IdeaBlob</h1>
+      <div className="flex items-center h-16 border-b border-gray-200 dark:border-gray-800 px-6">
+        <Link href="/" className="flex items-center gap-3">
+          <Image 
+            src={isDarkMode ? "/iconWhite.png" : "/icon.png"} 
+            alt="IdeaBlob Logo" 
+            width={50} 
+            height={50} 
+            className="h-12 w-12"
+          />
+          <h1 className="text-xl font-bold">IdeaBlob</h1>
+        </Link>
       </div>
       <div className="flex flex-col flex-1 p-4 space-y-2">
         <Link

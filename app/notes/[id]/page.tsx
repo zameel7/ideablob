@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { NoteEditor } from "@/components/notes/note-editor";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { MarkdownContent } from "@/lib/markdown-utils";
 
 // Function to get a single note by ID
 const getNoteById = async (noteId: string): Promise<Note | null> => {
@@ -37,7 +38,11 @@ const getNoteById = async (noteId: string): Promise<Note | null> => {
   }
 };
 
-export default function NotePage({ params }: { params: { id: string } }) {
+export default function NotePage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
+  // Unwrap params using React.use()
+  const unwrappedParams = params instanceof Promise ? use(params) : params;
+  const noteId = unwrappedParams.id;
+  
   const router = useRouter();
   const { user } = useAuth();
   const [note, setNote] = useState<Note | null>(null);
@@ -52,7 +57,7 @@ export default function NotePage({ params }: { params: { id: string } }) {
       
       try {
         // Fetch note
-        const fetchedNote = await getNoteById(params.id);
+        const fetchedNote = await getNoteById(noteId);
         setNote(fetchedNote);
         
         // Fetch categories
@@ -68,7 +73,7 @@ export default function NotePage({ params }: { params: { id: string } }) {
     };
     
     fetchData();
-  }, [user, params.id, router]);
+  }, [user, noteId, router]);
 
   const getCategoryName = (categoryId: string): string => {
     const category = categories.find(cat => cat.id === categoryId);
@@ -124,12 +129,12 @@ export default function NotePage({ params }: { params: { id: string } }) {
 
   return (
     <AppLayout>
-      <div className="container mx-auto p-6 max-w-5xl">
+      <div className="container mx-auto px-4 sm:px-6 py-8 md:px-8 md:py-10 lg:px-10 lg:py-12 max-w-5xl">
         <div className="mb-8">
           <Button 
             variant="ghost" 
             onClick={() => router.push("/notes")}
-            className="mb-6 -ml-2 hover:bg-muted"
+            className="mb-6 -ml-2 hover:bg-muted/60 rounded-lg flex items-center h-10"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Notes
@@ -139,18 +144,18 @@ export default function NotePage({ params }: { params: { id: string } }) {
             <div className="space-y-6">
               <Skeleton className="h-10 w-3/4" />
               <Skeleton className="h-5 w-1/4" />
-              <Skeleton className="h-[400px] w-full rounded-lg" />
+              <Skeleton className="h-[400px] w-full rounded-xl" />
             </div>
           ) : note ? (
             <>
-              <Card className="overflow-hidden border-muted shadow-sm">
-                <CardHeader className="p-8 pb-4 flex flex-row items-start justify-between space-y-0">
+              <Card className="overflow-hidden border-muted/60 shadow-sm rounded-xl">
+                <CardHeader className="p-6 sm:p-8 pb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
                   <div className="space-y-3">
-                    <h1 className="text-3xl font-bold tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                       {note.title || "Untitled Note"}
                     </h1>
-                    <div className="flex items-center space-x-3">
-                      <Badge variant="outline" className="px-3 py-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Badge variant="outline" className="px-3 py-1 rounded-md">
                         {getCategoryName(note.categoryId)}
                       </Badge>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -160,19 +165,19 @@ export default function NotePage({ params }: { params: { id: string } }) {
                     {note.tags && note.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-3">
                         {note.tags.map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs px-2.5 py-0.5">
+                          <Badge key={index} variant="secondary" className="text-xs px-2.5 py-0.5 rounded-md">
                             {tag}
                           </Badge>
                         ))}
                       </div>
                     )}
                   </div>
-                  <div className="flex space-x-3">
+                  <div className="flex flex-wrap gap-3">
                     <Button 
                       variant="outline" 
                       size="sm" 
                       onClick={() => setIsEditorOpen(true)}
-                      className="h-9"
+                      className="h-9 px-4 rounded-lg"
                     >
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
@@ -182,21 +187,21 @@ export default function NotePage({ params }: { params: { id: string } }) {
                       size="sm" 
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="h-9"
+                      className="h-9 px-4 rounded-lg"
                     >
                       <Trash className="mr-2 h-4 w-4" />
                       {isDeleting ? "Deleting..." : "Delete"}
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="p-8 pt-4">
+                <CardContent className="p-6 sm:p-8 pt-4">
                   <div className="prose dark:prose-invert max-w-none">
-                    <div className="whitespace-pre-wrap text-base">
-                      {note.content}
+                    <div className="text-base markdown-content">
+                      <MarkdownContent content={note.content} />
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="p-8 pt-0 border-t text-sm text-gray-500 dark:text-gray-400">
+                <CardFooter className="p-6 sm:p-8 pt-0 border-t text-sm text-gray-500 dark:text-gray-400">
                   Last updated: {formatDate(note.updatedAt)}
                 </CardFooter>
               </Card>
@@ -209,17 +214,17 @@ export default function NotePage({ params }: { params: { id: string } }) {
                 onSave={handleSaveNote}
               />
             </>
-          ) : (
-            <div className="text-center py-16 border rounded-lg bg-muted/20">
+          ) :
+            <div className="text-center py-16 border rounded-xl bg-muted/10">
               <h3 className="text-lg font-medium mb-2">Note not found</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 The note you're looking for doesn't exist or has been deleted.
               </p>
-              <Button onClick={() => router.push("/notes")}>
+              <Button onClick={() => router.push("/notes")} className="px-4 rounded-lg">
                 Go back to Notes
               </Button>
             </div>
-          )}
+          }
         </div>
       </div>
     </AppLayout>
