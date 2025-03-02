@@ -1,30 +1,28 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/lib/auth-context";
+import {
+  Category,
+  createDefaultCategories,
+  getAllCategories
+} from "@/lib/category-service";
+import {
+  Note,
+  NoteInput,
+  createNote,
+  deleteNote,
+  getAllNotes,
+  updateNote
+} from "@/lib/note-service";
+import { Plus } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { NoteCard } from "./note-card";
 import { NoteEditor } from "./note-editor";
-import { useAuth } from "@/lib/auth-context";
-import { toast } from "sonner";
-import { 
-  Note, 
-  NoteInput, 
-  getAllNotes, 
-  getNotesByCategory, 
-  createNote, 
-  updateNote, 
-  deleteNote 
-} from "@/lib/note-service";
-import { 
-  Category, 
-  getAllCategories, 
-  createDefaultCategories 
-} from "@/lib/category-service";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface NotesListProps {
   searchQuery?: string;
@@ -91,11 +89,6 @@ export function NotesList({ searchQuery = "" }: NotesListProps) {
     });
   }, [notes, selectedCategory, searchQuery]);
 
-  // Handle category change
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-  };
-
   // Handle note creation/update
   const handleSaveNote = async (noteId: string | null, data: NoteInput) => {
     if (!user) return;
@@ -114,6 +107,7 @@ export function NotesList({ searchQuery = "" }: NotesListProps) {
       } else {
         // Create new note
         const newNoteId = await createNote(user.uid, data);
+        console.log("newNoteId", newNoteId);
         
         // Refresh notes to get the new one with server timestamp
         const updatedNotes = await getAllNotes(user.uid);
@@ -138,12 +132,6 @@ export function NotesList({ searchQuery = "" }: NotesListProps) {
       toast.error("Failed to delete note");
       throw error;
     }
-  };
-
-  // Open editor for creating a new note
-  const handleNewNote = () => {
-    setEditingNote(undefined);
-    setIsEditorOpen(true);
   };
 
   // Open editor for editing an existing note

@@ -1,15 +1,11 @@
 "use client";
 
+import { FolderOpen, MessageSquare, User } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { MessageSquare, FolderOpen, User } from "lucide-react";
-import { useTheme } from "next-themes";
 
 export function MobileNav() {
   const pathname = usePathname();
-  const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
 
   return (
     <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 dark:bg-gray-900 dark:border-gray-800 md:hidden">

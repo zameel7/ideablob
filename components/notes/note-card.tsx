@@ -1,21 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Edit, Trash, MoreVertical, ExternalLink } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Note } from "@/lib/note-service";
 import { Category } from "@/lib/category-service";
-import { formatDistanceToNow } from "date-fns";
 import { MarkdownContent } from "@/lib/markdown-utils";
+import { Note } from "@/lib/note-service";
+import { formatDistanceToNow } from "date-fns";
+import { Edit, ExternalLink, MoreVertical, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface NoteCardProps {
   note: Note;
@@ -42,6 +42,7 @@ export function NoteCard({ note, categories, onEdit, onDelete }: NoteCardProps) 
       try {
         await onDelete(note.id);
       } catch (error) {
+        console.error("Error deleting note:", error);
         setIsDeleting(false);
       }
     }
