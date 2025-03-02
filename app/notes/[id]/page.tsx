@@ -38,10 +38,15 @@ const getNoteById = async (noteId: string): Promise<Note | null> => {
   }
 };
 
-export default function NotePage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
-  // Unwrap params using React.use()
-  const unwrappedParams = params instanceof Promise ? use(params) : params;
-  const noteId = unwrappedParams.id;
+// Define the correct type for params
+type NotePageParams = {
+  params: {
+    id: string;
+  };
+};
+
+export default function NotePage({ params }: NotePageParams) {
+  const { id } = params;
   
   const router = useRouter();
   const { user } = useAuth();
@@ -57,7 +62,7 @@ export default function NotePage({ params }: { params: { id: string } | Promise<
       
       try {
         // Fetch note
-        const fetchedNote = await getNoteById(noteId);
+        const fetchedNote = await getNoteById(id);
         setNote(fetchedNote);
         
         // Fetch categories
@@ -73,7 +78,7 @@ export default function NotePage({ params }: { params: { id: string } | Promise<
     };
     
     fetchData();
-  }, [user, noteId, router]);
+  }, [user, id, router]);
 
   const getCategoryName = (categoryId: string): string => {
     const category = categories.find(cat => cat.id === categoryId);
