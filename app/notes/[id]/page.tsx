@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -38,15 +38,9 @@ const getNoteById = async (noteId: string): Promise<Note | null> => {
   }
 };
 
-// Define the correct type for params
-type NotePageParams = {
-  params: {
-    id: string;
-  };
-};
-
-export default function NotePage({ params }: NotePageParams) {
-  const { id } = params;
+export default function NotePage() {
+  const params = useParams();
+  const id = params?.id as string;
   
   const router = useRouter();
   const { user } = useAuth();
@@ -58,7 +52,7 @@ export default function NotePage({ params }: NotePageParams) {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
+      if (!user || !id) return;
       
       try {
         // Fetch note
@@ -223,7 +217,7 @@ export default function NotePage({ params }: NotePageParams) {
             <div className="text-center py-16 border rounded-xl bg-muted/10">
               <h3 className="text-lg font-medium mb-2">Note not found</h3>
               <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                The note you're looking for doesn't exist or has been deleted.
+                The note you&apos;re looking for doesn&apos;t exist or has been deleted.
               </p>
               <Button onClick={() => router.push("/notes")} className="px-4 rounded-lg">
                 Go back to Notes
