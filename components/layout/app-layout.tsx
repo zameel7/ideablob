@@ -26,10 +26,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   // Main app layout
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-950">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">{children}</main>
+        <main className="flex-1 overflow-y-auto pb-16 md:pb-8 pt-4">{children}</main>
         <MobileNav />
       </div>
     </div>

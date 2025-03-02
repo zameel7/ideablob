@@ -15,6 +15,7 @@ import { db } from "./firebase";
 
 export interface Note {
   id: string;
+  title: string;
   content: string;
   categoryId: string;
   tags: string[];
@@ -24,6 +25,7 @@ export interface Note {
 }
 
 export interface NoteInput {
+  title: string;
   content: string;
   categoryId: string;
   tags?: string[];

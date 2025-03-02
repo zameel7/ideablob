@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { useAuth } from "./auth-context";
+import { useTheme } from "next-themes";
 
 interface UserPreferences {
   theme: "light" | "dark" | "system";
@@ -27,9 +28,27 @@ const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
+  const { setTheme } = useTheme();
   const [apiKey, setApiKeyState] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
   const [loading, setLoading] = useState(true);
+
+  // Load API key from localStorage on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedApiKey = localStorage.getItem('googleAiApiKey');
+      if (storedApiKey) {
+        setApiKeyState(storedApiKey);
+      }
+    }
+  }, []);
+
+  // Apply theme when preferences change
+  useEffect(() => {
+    if (preferences.theme) {
+      setTheme(preferences.theme);
+    }
+  }, [preferences.theme, setTheme]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -44,13 +63,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setApiKeyState(userData.apiKey || null);
           setPreferences(userData.preferences || defaultPreferences);
         } else {
           // Create a new user document if it doesn't exist
           await setDoc(userDocRef, {
             email: user.email,
-            apiKey: null,
             preferences: defaultPreferences,
           });
         }
@@ -65,12 +82,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user]);
 
   const setApiKey = async (key: string) => {
-    if (!user) return;
-
     try {
-      const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, { apiKey: key });
+      // Store in localStorage
+      localStorage.setItem('googleAiApiKey', key);
       setApiKeyState(key);
+      return Promise.resolve();
     } catch (error) {
       console.error("Error updating API key:", error);
       throw error;
@@ -85,6 +101,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, { preferences: newPreferences });
       setPreferences(newPreferences);
+      
+      // Apply theme change immediately
+      if (prefs.theme) {
+        setTheme(prefs.theme);
+      }
     } catch (error) {
       console.error("Error updating preferences:", error);
       throw error;

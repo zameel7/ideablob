@@ -5,6 +5,8 @@ import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { generateResponse } from "@/lib/ai-service";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 interface Message {
   role: "user" | "assistant";
@@ -14,7 +16,9 @@ interface Message {
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -22,6 +26,9 @@ export function ChatInterface() {
   }, [messages]);
 
   const handleSendMessage = async (content: string) => {
+    // Reset API key error state
+    setApiKeyError(false);
+    
     // Add user message to state
     const userMessage: Message = { role: "user", content };
     setMessages((prev) => [...prev, userMessage]);
@@ -36,7 +43,16 @@ export function ChatInterface() {
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to generate response");
+      
+      // Check if it's an API key error
+      if (error instanceof Error && 
+          (error.message.includes("API key") || 
+           error.message.includes("unregistered callers"))) {
+        setApiKeyError(true);
+        toast.error("Google AI API key is missing or invalid");
+      } else {
+        toast.error("Failed to generate response");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -46,6 +62,25 @@ export function ChatInterface() {
     // This could navigate to the note or show a confirmation
     console.log("Note saved with ID:", noteId);
   };
+
+  const navigateToProfile = () => {
+    router.push("/profile");
+  };
+
+  // Show API key error message
+  if (apiKeyError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+        <h2 className="text-2xl font-bold mb-2">API Key Required</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+          To use the AI features, you need to add your Google Generative AI API key in your profile settings.
+        </p>
+        <Button onClick={navigateToProfile}>
+          Go to Profile Settings
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">

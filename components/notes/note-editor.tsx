@@ -7,6 +7,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -14,6 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   Sheet,
@@ -21,11 +23,21 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetFooter,
 } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Note, NoteInput } from "@/lib/note-service";
 import { Category } from "@/lib/category-service";
+import { X } from "lucide-react";
 
 const formSchema = z.object({
+  title: z.string().min(1, { message: "Title is required" }),
   content: z.string().min(1, { message: "Note content is required" }),
   categoryId: z.string().min(1, { message: "Category is required" }),
   tags: z.string().optional(),
@@ -45,6 +57,7 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      title: note?.title || "",
       content: note?.content || "",
       categoryId: note?.categoryId || (categories[0]?.id || ""),
       tags: note?.tags.join(", ") || "",
@@ -55,12 +68,14 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
   useEffect(() => {
     if (note) {
       form.reset({
+        title: note.title || "",
         content: note.content,
         categoryId: note.categoryId,
         tags: note.tags.join(", "),
       });
     } else {
       form.reset({
+        title: "",
         content: "",
         categoryId: categories[0]?.id || "",
         tags: "",
@@ -72,6 +87,7 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
     setIsLoading(true);
     try {
       const noteData: NoteInput = {
+        title: values.title,
         content: values.content,
         categoryId: values.categoryId,
         tags: values.tags ? values.tags.split(",").map(tag => tag.trim()).filter(Boolean) : [],
@@ -90,84 +106,123 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-md md:max-w-lg">
-        <SheetHeader>
-          <SheetTitle>{note ? "Edit Note" : "Create Note"}</SheetTitle>
-          <SheetDescription>
+      <SheetContent className="sm:max-w-md md:max-w-lg overflow-y-auto">
+        <SheetHeader className="mb-8">
+          <div className="flex items-center justify-between">
+            <SheetTitle className="text-xl font-bold">
+              {note ? "Edit Note" : "Create Note"}
+            </SheetTitle>
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <SheetDescription className="mt-1.5">
             {note
               ? "Make changes to your note here"
               : "Add a new note to your collection"}
           </SheetDescription>
         </SheetHeader>
-        <div className="py-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Content</FormLabel>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">Title</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Note title"
+                      className="h-10"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">Content</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Write your note here..."
+                      className="min-h-[200px] resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">Category</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                    value={field.value}
+                  >
                     <FormControl>
-                      <Textarea
-                        placeholder="Write your note here..."
-                        className="min-h-[200px] resize-none"
-                        {...field}
-                      />
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="categoryId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        {...field}
-                      >
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tags (comma separated)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="work, important, todo"
-                        className="min-h-[80px] resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end space-x-2 pt-4">
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">Tags</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="work, important, todo"
+                      className="min-h-[80px] resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription className="mt-1.5">
+                    Separate tags with commas
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <SheetFooter className="pt-6 border-t mt-8">
+              <div className="flex justify-end space-x-4 w-full mt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={onClose}
                   disabled={isLoading}
+                  className="px-6"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={isLoading} className="px-6">
                   {isLoading
                     ? note
                       ? "Updating..."
@@ -177,9 +232,9 @@ export function NoteEditor({ note, categories, isOpen, onClose, onSave }: NoteEd
                     : "Create"}
                 </Button>
               </div>
-            </form>
-          </Form>
-        </div>
+            </SheetFooter>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );

@@ -13,6 +13,14 @@ import { toast } from "sonner";
 import { ApiKeyForm } from "@/components/auth/api-key-form";
 import { updateProfile } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Moon, Sun, Monitor } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
@@ -35,10 +43,10 @@ export default function ProfilePage() {
     }
   };
 
-  const handleToggleDarkMode = async (checked: boolean) => {
+  const handleThemeChange = async (theme: "light" | "dark" | "system") => {
     try {
-      await updatePreferences({ theme: checked ? "dark" : "light" });
-      toast.success(`${checked ? "Dark" : "Light"} mode enabled`);
+      await updatePreferences({ theme });
+      toast.success(`Theme set to ${theme} mode`);
     } catch (error) {
       console.error("Error updating preferences:", error);
       toast.error("Failed to update preferences");
@@ -125,18 +133,39 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="dark-mode">Dark Mode</Label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Toggle between light and dark theme
-                  </p>
-                </div>
-                <Switch
-                  id="dark-mode"
-                  checked={preferences?.theme === "dark"}
-                  onCheckedChange={handleToggleDarkMode}
-                />
+              <div className="space-y-2">
+                <Label htmlFor="theme">Theme</Label>
+                <Select 
+                  value={preferences?.theme || "system"} 
+                  onValueChange={(value) => handleThemeChange(value as "light" | "dark" | "system")}
+                >
+                  <SelectTrigger id="theme" className="w-full">
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">
+                      <div className="flex items-center">
+                        <Sun className="mr-2 h-4 w-4" />
+                        <span>Light</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="dark">
+                      <div className="flex items-center">
+                        <Moon className="mr-2 h-4 w-4" />
+                        <span>Dark</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="system">
+                      <div className="flex items-center">
+                        <Monitor className="mr-2 h-4 w-4" />
+                        <span>System</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Choose your preferred theme
+                </p>
               </div>
             </CardContent>
           </Card>

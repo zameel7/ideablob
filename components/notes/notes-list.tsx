@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,13 +23,18 @@ import {
   getAllCategories, 
   createDefaultCategories 
 } from "@/lib/category-service";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function NotesList() {
+interface NotesListProps {
+  searchQuery?: string;
+}
+
+export function NotesList({ searchQuery = "" }: NotesListProps) {
   const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | undefined>(undefined);
@@ -42,16 +47,20 @@ export function NotesList() {
       setIsLoading(true);
       try {
         // Fetch categories
-        const fetchedCategories = await getAllCategories(user.uid);
+        let fetchedCategories = await getAllCategories(user.uid);
         
         // If no categories, create default ones
         if (fetchedCategories.length === 0) {
           await createDefaultCategories(user.uid);
-          const newCategories = await getAllCategories(user.uid);
-          setCategories(newCategories);
-        } else {
-          setCategories(fetchedCategories);
+          fetchedCategories = await getAllCategories(user.uid);
         }
+        
+        // Remove any potential duplicates by ID
+        const uniqueCategories = Array.from(
+          new Map(fetchedCategories.map(cat => [cat.id, cat])).values()
+        );
+        
+        setCategories(uniqueCategories);
         
         // Fetch all notes
         const fetchedNotes = await getAllNotes(user.uid);
@@ -67,15 +76,20 @@ export function NotesList() {
     fetchData();
   }, [user]);
 
-  // Filter notes by category and search query
-  const filteredNotes = notes.filter((note) => {
-    const matchesCategory = selectedCategory === "all" || note.categoryId === selectedCategory;
-    const matchesSearch = searchQuery === "" || 
-      note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    return matchesCategory && matchesSearch;
-  });
+  // Filter notes based on category and search query
+  const filteredNotes = useMemo(() => {
+    return notes.filter((note) => {
+      // Filter by category
+      const categoryMatch = selectedCategory === "all" || note.categoryId === selectedCategory;
+      
+      // Filter by search query
+      const searchMatch = searchQuery === "" || 
+        note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      return categoryMatch && searchMatch;
+    });
+  }, [notes, selectedCategory, searchQuery]);
 
   // Handle category change
   const handleCategoryChange = (value: string) => {
@@ -138,70 +152,88 @@ export function NotesList() {
     setIsEditorOpen(true);
   };
 
+  // Get category name by ID
+  const getCategoryName = (categoryId: string): string => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.name : "Uncategorized";
+  };
+
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">Your Notes</h1>
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-            <Input
-              type="search"
-              placeholder="Search notes..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Button onClick={handleNewNote}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Note
-          </Button>
-        </div>
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">Your Notes</h1>
+        <Button onClick={() => setIsEditorOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Note
+        </Button>
       </div>
 
-      <Tabs defaultValue="all" value={selectedCategory} onValueChange={handleCategoryChange}>
-        <TabsList className="mb-4 overflow-x-auto flex-nowrap">
-          <TabsTrigger value="all">All</TabsTrigger>
-          {categories.map((category) => (
-            <TabsTrigger key={category.id} value={category.id}>
-              {category.name}
-            </TabsTrigger>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="h-[200px]">
+              <CardHeader className="p-4">
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent className="p-4">
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+              <CardFooter className="p-4 border-t">
+                <Skeleton className="h-4 w-20" />
+              </CardFooter>
+            </Card>
           ))}
-        </TabsList>
+        </div>
+      ) : (
+        <>
+          <div className="border rounded-lg p-1.5 mb-6">
+            <Tabs defaultValue="all" onValueChange={handleCategoryChange}>
+              <TabsList className="w-full flex flex-wrap justify-start bg-transparent">
+                <TabsTrigger value="all" className="flex-grow-0 px-4 py-2 data-[state=active]:bg-background">
+                  All Notes
+                </TabsTrigger>
+                {categories.map((category) => (
+                  <TabsTrigger
+                    key={category.id}
+                    value={category.id}
+                    className="flex-grow-0 px-4 py-2 data-[state=active]:bg-background"
+                  >
+                    {category.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
 
-        <TabsContent value={selectedCategory} className="mt-0">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : filteredNotes.length === 0 ? (
-            <div className="text-center py-12">
+          {filteredNotes.length === 0 ? (
+            <div className="text-center py-16 border rounded-lg bg-muted/20">
               <h3 className="text-lg font-medium mb-2">No notes found</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">
-                {searchQuery
-                  ? "Try a different search term"
-                  : "Create your first note to get started"}
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                {selectedCategory === "all"
+                  ? "You haven't created any notes yet."
+                  : `You don't have any notes in the "${getCategoryName(selectedCategory)}" category.`}
               </p>
-              <Button onClick={handleNewNote}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Note
+              <Button onClick={() => setIsEditorOpen(true)}>
+                Create your first note
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredNotes.map((note) => (
                 <NoteCard
                   key={note.id}
                   note={note}
+                  categories={categories}
                   onEdit={handleEditNote}
                   onDelete={handleDeleteNote}
                 />
               ))}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </>
+      )}
 
       <NoteEditor
         note={editingNote}
