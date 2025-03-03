@@ -6,11 +6,14 @@ import { SignupForm } from "./signup-form";
 import { ApiKeyForm } from "./api-key-form";
 import { useAuth } from "@/lib/auth-context";
 import { useUser } from "@/lib/user-context";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 
 export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const { user } = useAuth();
   const { apiKey } = useUser();
+  const { resolvedTheme } = useTheme();
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
@@ -22,7 +25,15 @@ export function AuthPage() {
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">IdeaBlob</h1>
+            <div className="flex justify-center">
+              <Image 
+                src={resolvedTheme === "dark" ? "/iconWhite.png" : "/icon.png"} 
+                alt="IdeaBlob Logo" 
+                width={150} 
+                height={150} 
+                priority
+              />
+            </div>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               AI-powered note-taking and organization
             </p>
@@ -38,7 +49,15 @@ export function AuthPage() {
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">IdeaBlob</h1>
+          <div className="flex justify-center">
+            <Image 
+              src={resolvedTheme === "dark" ? "/iconWhite.png" : "/icon.png"} 
+              alt="IdeaBlob Logo" 
+              width={150} 
+              height={150} 
+              priority
+            />
+          </div>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
             AI-powered note-taking and organization
           </p>
